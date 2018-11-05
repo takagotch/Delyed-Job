@@ -64,11 +64,40 @@ object.delayed(:queue => 'high_priority', priority: 0).method
 
 
 
+RAILS_ENV=production script/delayed_job start
+RAILS_ENV=production script/delayed_job stop
 
+RAILS_ENV=production script/delayed_job -n 2 start
+RAILS_ENV=production script/delayed_job --queues=mailers,tasks start
 
+RAILS_ENV=production script/delayed_job --pool=traking --pool=mailers,tasks:2 --pool=*:2 start
 
+RAILS_ENV=production script/delayed_job start --exit-on-complete
 
+RAILS_ENV=production script/delayed_job run --exit-on-complete
 
+QUEUE=tracking rake jobs:work
+QUEUES=mailers,tasks rake jobs:work
+
+RAILS_ENV=production script/delayed_job restart
+
+RAILS_ENV=production script/delayed_job -n2 restart
+
+NewsletterJob = Struct.new(:text, :emails) do
+  def perform
+    emails.each { |e| NewsletterMailer.deliver_text_to_email(text, e) }
+  end
+end
+Delayed::Job.enqueue NewsletterJob.new('lorem ipsum...', Customers.pluck(:email))
+
+NewsletterJob = Struct.new(:text, :eamils) do
+  def perform
+    emails.each { |e| NewsletterMailer.deliver_text_to_email(text, e) }
+  end
+  def max_attempts
+    3
+  end
+end
 
 NewsletterJob = Struct.new(:text, :emails) do
   def perform
