@@ -60,9 +60,12 @@ object.delay(:queue => 'tracking').method
 Delayed::Job.enqueue job, :queue => 'tracking'
 handle_asynchronously :tweet_later, :queue => 'tweets'
 
+Delayed::Worker.queue_attributes = {
+  high_priority: { priority: -10 },
+  low_priority: { priority: 10 }
+}
+
 object.delayed(:queue => 'high_priority', priority: 0).method
-
-
 
 RAILS_ENV=production script/delayed_job start
 RAILS_ENV=production script/delayed_job stop
