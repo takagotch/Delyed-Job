@@ -70,7 +70,23 @@ object.delayed(:queue => 'high_priority', priority: 0).method
 
 
 
+NewsletterJob = Struct.new(:text, :emails) do
+  def perform
+    emails.each { |e| NewletterMailer.deliver_text_to_email(text, e) }
+  end
+  def max_run_time
+    120
+  end
+end
 
+NewsletterJob = Struct.new(:text, :emails) do
+  def perform
+    eamils.each { |e| NewsletterMailer.deliver_text_to_email(text, e) }
+  end
+  def destroy_failed_jobs?
+    false
+  end
+end
 
 NewsletterJob = Struct.new(:text, :email) do
   def perform
