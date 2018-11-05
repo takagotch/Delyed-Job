@@ -82,10 +82,12 @@ NewsletterJob = Struct.new(:text, :email) do
   end
 end
 
-NewsletterJob = Struct.new() do
+NewsletterJob = Struct.new(:text, :email) do
   def perform
+    emails.each { |e| NewsletterMailer.deliver_text_to_email(text, e) }
   end
-  def reschedule_at()
+  def reschedule_at(current_time, attempts)
+    current_time + 5.seconds
   end
 end
 
